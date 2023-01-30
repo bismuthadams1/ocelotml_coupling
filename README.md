@@ -9,6 +9,7 @@ This repository contains the code to download the OCELOT dimer v1 dataset and us
 
 `dataset.ipynb` - download the OCELOT chrmomophore v1 dataset and transform to pandas DataFrame
 
+`test.xyz` - contains XYZ coordinates for a pentacene dimer
 
 ## Citing
 
