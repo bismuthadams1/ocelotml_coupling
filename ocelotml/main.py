@@ -53,8 +53,19 @@ def predict_from_molecule(molecule, model):
     R_i = torch.tensor(molecule.cart_coords, dtype=torch.float32)
     z_i = torch.tensor(np.array(molecule.atomic_numbers), dtype=torch.int64)
     data = Data(pos=R_i, z=z_i,)
-    batch = DataLoader([data], batch_size=1)
-    return predict(batch,model)
+    # batch = DataLoader([data], batch_size=1)
+    # Use torch.no_grad() to avoid building the computation graph
+    # Manually assign a batch attribute: all nodes belong to batch 0
+    data.batch = torch.zeros(data.num_nodes, dtype=torch.long)
+    
+    # Use no_grad to avoid creating the computation graph during inference
+    with torch.no_grad():
+        output = model(data)
+        # Ensure output is on CPU and detach from computation graph
+        output_np = output.detach().cpu().numpy()
+        # Adjust indexing based on expected output dimensions
+        prediction = round(output_np[-1][0], 3)
+    return prediction
 
 def predict_from_file(filename, model):
     """
