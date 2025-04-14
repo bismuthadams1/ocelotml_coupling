@@ -6,7 +6,7 @@ setup(
     packages= find_packages(),
     entry_points={
         'console_scripts': [
-            'latent_vectors = latent_vectors.main:main',
+            'ocelotml = ocelotml.main:main',
         ],
     },
 )

@@ -1,0 +1,8 @@
+README.md
+setup.py
+models/__init__.py
+ocelotml.egg-info/PKG-INFO
+ocelotml.egg-info/SOURCES.txt
+ocelotml.egg-info/dependency_links.txt
+ocelotml.egg-info/entry_points.txt
+ocelotml.egg-info/top_level.txt
