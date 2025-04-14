@@ -6,6 +6,7 @@ dependencies:
   - pymatgen
   - pytorch
   - ipykernel
+  - numpy==1.26.4
   - pip
   - pip:
     - torch-scatter   
