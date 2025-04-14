@@ -5,14 +5,33 @@ import numpy as np
 from torch_geometric.data import Data
 from pymatgen.core.structure import Structure, Molecule
 from torch_geometric.loader import DataLoader
+import ocelotml
+from typing import Literal
+import os
 
-def predict(batch, checkpoint):
+FP_DIR = os.path.dirname(ocelotml.__file__)
+
+CHECKPOINT_PATHS = {
+ 'hh' : os.path.join(FP_DIR,'./models/hh.pt'),
+ 'll' : os.path.join(FP_DIR,'./models/ll.pt'),
+}
+
+def load_models(checkpoint: Literal['hh','ll']):
+
     model = SphereNet(energy_and_force=False, cutoff=5.0, num_layers=4,
                       hidden_channels=128, out_channels=1, int_emb_size=64,
                       basis_emb_size_dist=8, basis_emb_size_angle=8, basis_emb_size_torsion=8, out_emb_channels=256,
                       num_spherical=3, num_radial=6, envelope_exponent=5,
                       num_before_skip=1, num_after_skip=2, num_output_layers=3)
-    model.load_state_dict(torch.load(checkpoint,map_location=torch.device('cpu'), weights_only = False)["model_state_dict"])
+    model.load_state_dict(
+        torch.load(CHECKPOINT_PATHS[checkpoint],map_location=torch.device('cpu'), weights_only = False
+    )["model_state_dict"])
+    model.eval()
+
+    return model
+
+
+def predict(batch, model):
     model.eval()
     results = []
     for data in batch:
@@ -20,7 +39,7 @@ def predict(batch, checkpoint):
         results.append(round(prediction.detach().numpy()[-1][0],3))
     return results
 
-def predict_from_molecule(molecule, checkpoint):
+def predict_from_molecule(molecule, model):
     """
     args: 
 
@@ -35,9 +54,9 @@ def predict_from_molecule(molecule, checkpoint):
     z_i = torch.tensor(np.array(molecule.atomic_numbers), dtype=torch.int64)
     data = Data(pos=R_i, z=z_i,)
     batch = DataLoader([data], batch_size=1)
-    return predict(batch,checkpoint=checkpoint)
+    return predict(batch,model)
 
-def predict_from_file(filename, checkpoint):
+def predict_from_file(filename, model):
     """
     args: 
     
@@ -49,4 +68,4 @@ def predict_from_file(filename, checkpoint):
     Makes prediction from XYZ file with dimer coordinates
     """
     molecule = Molecule.from_file(filename)
-    return predict_from_molecule(molecule, checkpoint)
+    return predict_from_molecule(molecule, model)
