@@ -1,2 +1,2 @@
 [console_scripts]
-latent_vectors = latent_vectors.main:main
+ocelotml = ocelotml.main:main

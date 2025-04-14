@@ -1,6 +1,8 @@
 README.md
 setup.py
 models/__init__.py
+ocelotml/__init__.py
+ocelotml/main.py
 ocelotml.egg-info/PKG-INFO
 ocelotml.egg-info/SOURCES.txt
 ocelotml.egg-info/dependency_links.txt
