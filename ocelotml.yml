@@ -14,5 +14,6 @@ dependencies:
     - torch-cluster
     - torch-spline-conv
     - torch-geometric
+    - more_itertools
     - git+https://github.com/divelab/DIG.git
     - tensorboard[w]
