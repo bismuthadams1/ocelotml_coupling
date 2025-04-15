@@ -2,3 +2,4 @@
 *.egg-info
 *.txt
 *__pycache__
+*.egg-info

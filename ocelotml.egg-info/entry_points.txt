@@ -1,2 +1,0 @@
-[console_scripts]
-ocelotml = ocelotml.main:main
