@@ -6,6 +6,8 @@ from torch_geometric.data import Data
 from pymatgen.core.structure import Structure, Molecule
 from torch_geometric.loader import DataLoader
 import ocelotml
+from torch_geometric.data import Batch
+from more_itertools import batched
 from typing import Literal
 import os
 
@@ -50,6 +52,7 @@ def _molecules_to_data_list(molecules) -> list[Data]:
         z_i = torch.tensor(np.array(molecule.atomic_numbers), dtype=torch.int64)
         data = Data(pos=R_i, z=z_i)
         data_list.append(data)
+        
     return data_list
 
 def predict_from_list(molecules: list[Molecule], model) -> list:
@@ -65,20 +68,19 @@ def predict_from_list(molecules: list[Molecule], model) -> list:
       list of coupling 
     
     """
-    molecules_data_list = _molecules_to_data_list(molecules=molecules)
-    loader = DataLoader(molecules_data_list, batch_size=len(molecules_data_list), shuffle=False)
-    
+    molecules_data_list = _molecules_to_data_list(molecules=molecules)    
     predictions = []
-    batch = next(iter(loader))
+    print('predicting couplings')
     with torch.no_grad():
-        predictions = model(batch)
-        preds = predictions.detach().cpu().numpy()
-        # for batch in loader:
-        #     out = model(batch)
-        #     # Assuming each graph gives one prediction; adjust extraction as needed.
-        #     batch_preds = out.detach().cpu().numpy()  # shape: (n_graphs, 1)
-        #     predictions.extend([round(pred[0], 3) for pred in batch_preds])
-    return list(preds)
+        for batch in batched(molecules_data_list, 10):
+            print(f"processing batch size {len(batch)}")
+            input_batch = Batch.from_data_list(batch)
+            print("running forward")
+            result = model(input_batch)
+            preds = result.detach().cpu().numpy()
+            predictions.extend(list(preds))
+
+    return predictions
 
 
 def predict(batch, model):
