@@ -43,7 +43,6 @@ def _molecules_to_data_list(molecules) -> list[Data]:
     list[Data]
         List of data objects to be processed
 
-    
     """
     data_list = []
     for molecule in molecules:
@@ -70,13 +69,16 @@ def predict_from_list(molecules: list[Molecule], model) -> list:
     loader = DataLoader(molecules_data_list, batch_size=len(molecules_data_list), shuffle=False)
     
     predictions = []
+    batch = next(iter(loader))
     with torch.no_grad():
-        for batch in loader:
-            out = model(batch)
-            # Assuming each graph gives one prediction; adjust extraction as needed.
-            batch_preds = out.detach().cpu().numpy()  # shape: (n_graphs, 1)
-            predictions.extend([round(pred[0], 3) for pred in batch_preds])
-    return predictions
+        predictions = model(batch)
+        preds = predictions.detach().cpu().numpy()
+        # for batch in loader:
+        #     out = model(batch)
+        #     # Assuming each graph gives one prediction; adjust extraction as needed.
+        #     batch_preds = out.detach().cpu().numpy()  # shape: (n_graphs, 1)
+        #     predictions.extend([round(pred[0], 3) for pred in batch_preds])
+    return list(preds)
 
 
 def predict(batch, model):
