@@ -4,7 +4,7 @@ import time
 def main():
     model =  load_models('hh')
     start = time.time()
-    predict_from_file("/Users/k2584788/forked_kugupu/kugupu/notebooks/dimer.xyz", model=model)[0]
+    predict_from_file("./dimer.xyz", model=model)[0]
     end = time.time()
     print(end-start)
 
