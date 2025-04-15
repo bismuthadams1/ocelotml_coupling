@@ -30,6 +30,54 @@ def load_models(checkpoint: Literal['hh','ll']):
 
     return model
 
+def _molecules_to_data_list(molecules) -> list[Data]:
+    """providing a list of pymatgen molecules, produce a datalist
+
+    Parameters
+    ----------
+    molecules: Molecule
+        pymatgen molecule
+
+    Returns
+    -------
+    list[Data]
+        List of data objects to be processed
+
+    
+    """
+    data_list = []
+    for molecule in molecules:
+        R_i = torch.tensor(molecule.cart_coords, dtype=torch.float32)
+        z_i = torch.tensor(np.array(molecule.atomic_numbers), dtype=torch.int64)
+        data = Data(pos=R_i, z=z_i)
+        data_list.append(data)
+    return data_list
+
+def predict_from_list(molecules: list[Molecule], model) -> list:
+    """Build a Dataloader batch and predict from list of molecules.
+
+    Parameters
+    ----------
+    molecules: list[Molecule]
+
+    Returns
+    -------
+    list   
+      list of coupling 
+    
+    """
+    molecules_data_list = _molecules_to_data_list(molecules=molecules)
+    loader = DataLoader(molecules_data_list, batch_size=len(molecules_data_list), shuffle=False)
+    
+    predictions = []
+    with torch.no_grad():
+        for batch in loader:
+            out = model(batch)
+            # Assuming each graph gives one prediction; adjust extraction as needed.
+            batch_preds = out.detach().cpu().numpy()  # shape: (n_graphs, 1)
+            predictions.extend([round(pred[0], 3) for pred in batch_preds])
+    return predictions
+
 
 def predict(batch, model):
     model.eval()
